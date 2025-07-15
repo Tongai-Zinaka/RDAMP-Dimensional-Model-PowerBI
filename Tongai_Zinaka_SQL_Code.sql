@@ -175,28 +175,6 @@ JOIN dim_product p ON s.product_id = p.product_key
 JOIN dim_location l ON s.postal_code = l.postal_code AND s.city = l.city
 JOIN dim_order_mode om ON s.order_mode = om.order_mode_name;
 
-
-INSERT INTO fact_sales (
-    customer_id, product_id, location_id, date_id, order_mode_id,
-    total_sales, total_cost, profit, discount_amount, quantity
-)
-SELECT
-    c.customer_id,
-    p.product_id,
-    l.location_id,
-    s.order_date,
-    om.order_mode_id,
-    s.sales,
-    s.cost_price * s.quantity AS total_cost,
-    (s.sales * (1 - s.Discount)) - (s.cost_price * s.quantity) AS profit,
-    s.sales * s.discount AS discount_amount,
-    s.quantity
-FROM staging_sales s
-JOIN dim_customer c ON s.customer_id = c.customer_key
-JOIN dim_product p ON s.product_id = p.product_key
-JOIN dim_location l ON s.postal_code = l.postal_code AND s.city = l.city
-JOIN dim_order_mode om ON s.order_mode = om.order_mode_name;
-
 SELECT
   specific_discount_rate AS discount_rate,
   AVG(profit) AS avg_profit,
@@ -249,7 +227,7 @@ SELECT
 FROM
   CalculatedRates
 WHERE
-  specific_discount_rate IS NOT NULL -- <<< THIS IS THE CRITICAL FIX
+  specific_discount_rate IS NOT NULL
 GROUP BY
   specific_discount_rate;
 
